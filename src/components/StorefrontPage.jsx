@@ -24,7 +24,7 @@ export default function StorefrontPage({ config, scoped = false }) {
   return (
     <div style={style}>
       <Header brand={config.brand} nav={config.nav} />
-      <Hero hero={config.hero} />
+      <Hero hero={config.hero} layout={config.theme.layout || 'split'} />
       <Categories categories={config.categories} />
       <Products products={config.products} />
       <About about={config.about} />

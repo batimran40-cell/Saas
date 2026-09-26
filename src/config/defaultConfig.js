@@ -1,7 +1,7 @@
 export default function defaultConfig() {
   return {
     brand: { name: 'Your Shop Name', logoInitial: 'Y' },
-    theme: { accent: '#2447C4', accentSoft: '#D6DFFA' },
+    theme: { accent: '#2447C4', accentSoft: '#D6DFFA', layout: 'split' },
     nav: [
       { label: 'Shop', href: '#products' },
       { label: 'Collections', href: '#categories' },

@@ -13,7 +13,7 @@ export default function PublicSite() {
     async function load() {
       const { data, error } = await supabase
         .from('shops')
-        .select('config')
+        .select('id, config')
         .eq('slug', slug)
         .maybeSingle()
       if (cancelled) return
@@ -27,6 +27,13 @@ export default function PublicSite() {
       }
       setShop(data.config)
       setStatus('ready')
+
+      // Fire-and-forget view tracking — never blocks or breaks the page.
+      supabase.from('page_views').insert({
+        shop_id: data.id,
+        path: `/site/${slug}`,
+        referrer: document.referrer || null,
+      })
     }
     load()
     return () => {
