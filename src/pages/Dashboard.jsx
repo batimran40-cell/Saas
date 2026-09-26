@@ -143,9 +143,20 @@ export default function Dashboard() {
           <Analytics shopId={shopId} />
         </div>
       ) : (
-        <div className="dashboard-body">
+        <div className="dashboard-body dashboard-body-with-nav">
+          <nav className="dashboard-nav">
+            <a href="#sec-address">Site address</a>
+            <a href="#sec-brand">Brand & design</a>
+            <a href="#sec-hero">Hero</a>
+            <a href="#sec-categories">Categories</a>
+            <a href="#sec-products">Products</a>
+            <a href="#sec-about">About</a>
+            <a href="#sec-testimonial">Testimonial</a>
+            <a href="#sec-newsletter">Newsletter</a>
+            <a href="#sec-footer">Footer</a>
+          </nav>
           <form className="dashboard-form" onSubmit={handleSave}>
-            <section className="dash-section">
+            <section className="dash-section" id="sec-address">
               <h2>Site address</h2>
               <label>
                 yourdomain.com/site/
@@ -153,7 +164,7 @@ export default function Dashboard() {
               </label>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-brand">
               <h2>Brand & design</h2>
               <label>
                 Shop name
@@ -194,7 +205,7 @@ export default function Dashboard() {
               </div>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-hero">
               <h2>Hero</h2>
               <label>
                 Headline
@@ -219,7 +230,7 @@ export default function Dashboard() {
               />
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-categories">
               <h2>Categories</h2>
               {config.categories.map((cat, i) => (
                 <div className="array-block" key={i}>
@@ -249,7 +260,7 @@ export default function Dashboard() {
               </button>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-products">
               <h2>Products</h2>
               {config.products.map((p, i) => (
                 <div className="array-block" key={i}>
@@ -282,7 +293,7 @@ export default function Dashboard() {
               </button>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-about">
               <h2>About</h2>
               <label>
                 Heading
@@ -300,7 +311,7 @@ export default function Dashboard() {
               />
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-testimonial">
               <h2>Testimonial</h2>
               <label>
                 Quote
@@ -325,7 +336,7 @@ export default function Dashboard() {
               </label>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-newsletter">
               <h2>Newsletter banner</h2>
               <label>
                 Heading
@@ -350,7 +361,7 @@ export default function Dashboard() {
               </label>
             </section>
 
-            <section className="dash-section">
+            <section className="dash-section" id="sec-footer">
               <h2>Footer</h2>
               {config.footer.columns.map((col, i) => (
                 <div className="array-block" key={i}>

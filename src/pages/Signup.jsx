@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
+import AuthLayout from '../components/AuthLayout.jsx'
 
 export default function Signup() {
   const [email, setEmail] = useState('')
@@ -20,9 +21,6 @@ export default function Signup() {
       setError(error.message)
       return
     }
-    // If your Supabase project requires email confirmation, there is no
-    // active session yet — send them to check their inbox instead of
-    // straight to the dashboard.
     if (!data.session) {
       setNotice('Check your email to confirm your account, then log in.')
       return
@@ -31,8 +29,8 @@ export default function Signup() {
   }
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
+    <AuthLayout title="Start your shop" subtitle="Your homepage is ready the second you sign up.">
+      <form onSubmit={handleSubmit}>
         <h1 className="section-heading">Create your account</h1>
         <label>
           Email
@@ -57,6 +55,6 @@ export default function Signup() {
           Already have an account? <Link to="/login">Log in</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

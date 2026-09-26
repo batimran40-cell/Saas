@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
+import AuthLayout from '../components/AuthLayout.jsx'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -23,8 +24,8 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-page">
-      <form className="auth-card" onSubmit={handleSubmit}>
+    <AuthLayout title="Welcome back" subtitle="Log in to keep editing your shop.">
+      <form onSubmit={handleSubmit}>
         <h1 className="section-heading">Log in</h1>
         <label>
           Email
@@ -42,6 +43,6 @@ export default function Login() {
           No account yet? <Link to="/signup">Sign up</Link>
         </p>
       </form>
-    </div>
+    </AuthLayout>
   )
 }

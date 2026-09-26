@@ -1025,3 +1025,237 @@ button {
   font-size: 13px;
   color: var(--ink-soft);
 }
+
+/* ---------- dashboard with sidebar nav ---------- */
+.dashboard-body-with-nav {
+  grid-template-columns: 200px 460px 1fr;
+}
+
+.dashboard-nav {
+  padding: 32px 0 32px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: calc(100vh - 77px - 49px);
+}
+
+.dashboard-nav a {
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 7px 0;
+}
+
+.dashboard-nav a:hover {
+  color: var(--accent);
+}
+
+@media (max-width: 1350px) {
+  .dashboard-body-with-nav {
+    grid-template-columns: 460px 1fr;
+  }
+  .dashboard-nav {
+    display: none;
+  }
+}
+
+/* ---------- landing nav ---------- */
+.landing-nav {
+  border-bottom: 1px solid var(--line);
+}
+
+.landing-nav-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+}
+
+.landing-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 15px;
+}
+
+.landing-nav-actions a:first-child:hover {
+  color: var(--accent);
+}
+
+/* ---------- landing hero with browser mockup ---------- */
+.landing-hero {
+  padding: 88px 0 100px;
+}
+
+.landing-hero-grid {
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.landing-hero-copy .hero-headline {
+  max-width: 11ch;
+  font-size: clamp(2.2rem, 3.6vw, 3.1rem);
+}
+
+.browser-chrome {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-alt);
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  padding: 10px 14px;
+}
+
+.browser-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.browser-url {
+  margin-left: 12px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  background: var(--bg);
+  border-radius: 3px;
+  padding: 3px 10px;
+}
+
+.browser-content {
+  border: 1px solid var(--line);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+  max-height: 420px;
+  box-shadow: 0 24px 48px rgba(28, 26, 22, 0.12);
+}
+
+.browser-scale {
+  transform: scale(0.62);
+  transform-origin: top left;
+  width: 161%;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .landing-hero-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- landing steps / features ---------- */
+.steps-grid,
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.step-card,
+.feature-card {
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--bg);
+}
+
+.step-number {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+}
+
+.step-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 500;
+  margin: 14px 0 8px;
+}
+
+@media (max-width: 900px) {
+  .steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.landing-cta-inner {
+  text-align: center;
+}
+
+.landing-cta-inner .btn {
+  margin-top: 8px;
+}
+
+/* ---------- auth split screen ---------- */
+.auth-split {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.auth-split-brand {
+  background: var(--ink);
+  color: var(--bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 64px;
+}
+
+.auth-split-logo {
+  color: var(--bg);
+  margin-bottom: 48px;
+}
+
+.auth-split-tagline {
+  font-size: clamp(1.8rem, 2.6vw, 2.4rem);
+  max-width: 14ch;
+  color: var(--bg);
+}
+
+.auth-split-sub {
+  margin-top: 18px;
+  max-width: 34ch;
+  color: rgba(246, 243, 236, 0.7);
+}
+
+.auth-split-form {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-split-form .auth-card {
+  width: 100%;
+  max-width: 360px;
+}
+
+.auth-split-form .auth-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 900px) {
+  .auth-split {
+    grid-template-columns: 1fr;
+  }
+  .auth-split-brand {
+    padding: 40px 32px;
+  }
+}
