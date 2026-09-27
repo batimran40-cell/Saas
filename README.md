@@ -83,3 +83,12 @@ shown and editable at the top of the dashboard.
 - **Richer analytics**: `page_views` currently only counts visits. Adding
   columns like `country` or `device` (filled in from request headers via
   a Supabase Edge Function) would let the Analytics tab break those down.
+- **Real social previews**: the meta tags in `PublicSite.jsx` update after
+  the page loads in the browser, which works for browser tabs but not for
+  crawlers that don't run JavaScript (some link-preview bots on WhatsApp,
+  Slack, etc.). True social previews need server-side rendering or a
+  pre-render step — a bigger change than this client-only app currently has.
+- **Actual selling**: there's still no cart or checkout — the product
+  quick-view is informational only. Adding real commerce would mean an
+  `orders` table, a checkout flow, and a payment processor (Stripe is the
+  usual choice).

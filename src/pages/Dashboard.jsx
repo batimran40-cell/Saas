@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import StorefrontPage from '../components/StorefrontPage.jsx'
 import ImageUploadField from '../components/ImageUploadField.jsx'
 import Analytics from '../components/Analytics.jsx'
+import themePresets from '../config/themePresets.js'
 
 export default function Dashboard() {
   const { shopId } = useParams()
@@ -203,6 +204,22 @@ export default function Dashboard() {
                   Centered
                 </button>
               </div>
+              <label>Color theme</label>
+              <div className="theme-swatches">
+                {Object.entries(themePresets).map(([id, preset]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={`theme-swatch ${
+                      (config.theme.preset || 'editorial') === id ? 'is-active' : ''
+                    }`}
+                    style={{ background: preset.bg, color: preset.ink, borderColor: preset.line }}
+                    onClick={() => updateField('theme', 'preset', id)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
             </section>
 
             <section className="dash-section" id="sec-hero">
@@ -273,6 +290,11 @@ export default function Dashboard() {
                     placeholder="Price"
                     value={p.price}
                     onChange={(e) => updateArrayItem('products', i, 'price', e.target.value)}
+                  />
+                  <textarea
+                    placeholder="Short description (shown in quick-view)"
+                    value={p.description || ''}
+                    onChange={(e) => updateArrayItem('products', i, 'description', e.target.value)}
                   />
                   <ImageUploadField
                     value={p.image}

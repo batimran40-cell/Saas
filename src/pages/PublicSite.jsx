@@ -3,6 +3,17 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import StorefrontPage from '../components/StorefrontPage.jsx'
 
+function setMeta(property, content, attr = 'property') {
+  if (!content) return
+  let tag = document.querySelector(`meta[${attr}="${property}"]`)
+  if (!tag) {
+    tag = document.createElement('meta')
+    tag.setAttribute(attr, property)
+    document.head.appendChild(tag)
+  }
+  tag.setAttribute('content', content)
+}
+
 export default function PublicSite() {
   const { slug } = useParams()
   const [shop, setShop] = useState(null)
@@ -27,6 +38,13 @@ export default function PublicSite() {
       }
       setShop(data.config)
       setStatus('ready')
+
+      // Update the tab title and social-preview tags for this shop.
+      document.title = data.config.brand?.name || 'Shop'
+      setMeta('og:title', data.config.brand?.name)
+      setMeta('og:description', data.config.hero?.subhead)
+      setMeta('og:image', data.config.hero?.image)
+      setMeta('theme-color', data.config.theme?.accent, 'name')
 
       // Fire-and-forget view tracking — never blocks or breaks the page.
       supabase.from('page_views').insert({
