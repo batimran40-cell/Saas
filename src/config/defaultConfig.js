@@ -19,8 +19,8 @@ export default function defaultConfig() {
       { name: 'Category two', image: 'https://picsum.photos/seed/new-shop-cat2/700/500', href: '#', size: 'small' },
     ],
     products: [
-      { name: 'Product one', price: '$0', tag: null, image: 'https://picsum.photos/seed/new-shop-p1/600/700', description: 'Say a little about this product — materials, size, or what makes it worth buying.' },
-      { name: 'Product two', price: '$0', tag: null, image: 'https://picsum.photos/seed/new-shop-p2/600/700', description: 'Say a little about this product — materials, size, or what makes it worth buying.' },
+      { name: 'Product one', price: '$0', priceCents: 0, tag: null, image: 'https://picsum.photos/seed/new-shop-p1/600/700', description: 'Say a little about this product — materials, size, or what makes it worth buying.' },
+      { name: 'Product two', price: '$0', priceCents: 0, tag: null, image: 'https://picsum.photos/seed/new-shop-p2/600/700', description: 'Say a little about this product — materials, size, or what makes it worth buying.' },
     ],
     about: {
       heading: 'Your story',

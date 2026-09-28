@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx'
 import StorefrontPage from '../components/StorefrontPage.jsx'
 import ImageUploadField from '../components/ImageUploadField.jsx'
 import Analytics from '../components/Analytics.jsx'
+import Orders from '../components/Orders.jsx'
 import themePresets from '../config/themePresets.js'
 
 export default function Dashboard() {
@@ -14,14 +15,15 @@ export default function Dashboard() {
   const [config, setConfig] = useState(null)
   const [status, setStatus] = useState('loading') // loading | ready | saving | saved | error
   const [error, setError] = useState(null)
-  const [tab, setTab] = useState('edit') // edit | analytics
+  const [tab, setTab] = useState('edit') // edit | orders | analytics
+  const [payments, setPayments] = useState({ accountId: null, onboarded: false, busy: false, error: null })
 
   useEffect(() => {
     let cancelled = false
     async function load() {
       const { data, error } = await supabase
         .from('shops')
-        .select('slug, config')
+        .select('slug, config, stripe_account_id, stripe_onboarded')
         .eq('id', shopId)
         .single()
       if (cancelled) return
@@ -32,6 +34,7 @@ export default function Dashboard() {
       }
       setSlug(data.slug)
       setConfig(data.config)
+      setPayments((p) => ({ ...p, accountId: data.stripe_account_id, onboarded: data.stripe_onboarded }))
       setStatus('ready')
     }
     load()
@@ -39,6 +42,28 @@ export default function Dashboard() {
       cancelled = true
     }
   }, [shopId])
+
+  async function handleConnectStripe() {
+    setPayments((p) => ({ ...p, busy: true, error: null }))
+    const { data, error } = await supabase.functions.invoke('create-connect-account', {
+      body: { shopId, returnUrl: window.location.href },
+    })
+    if (error || data?.error) {
+      setPayments((p) => ({ ...p, busy: false, error: data?.error || error.message }))
+      return
+    }
+    window.location.href = data.url
+  }
+
+  async function handleCheckStripeStatus() {
+    setPayments((p) => ({ ...p, busy: true, error: null }))
+    const { data, error } = await supabase.functions.invoke('connect-status', { body: { shopId } })
+    if (error || data?.error) {
+      setPayments((p) => ({ ...p, busy: false, error: data?.error || error.message }))
+      return
+    }
+    setPayments((p) => ({ ...p, busy: false, onboarded: data.onboarded }))
+  }
 
   function updateField(section, field, value) {
     setConfig((prev) => ({ ...prev, [section]: { ...prev[section], [field]: value } }))
@@ -134,6 +159,9 @@ export default function Dashboard() {
         <button className={tab === 'edit' ? 'is-active' : ''} onClick={() => setTab('edit')}>
           Edit
         </button>
+        <button className={tab === 'orders' ? 'is-active' : ''} onClick={() => setTab('orders')}>
+          Orders
+        </button>
         <button className={tab === 'analytics' ? 'is-active' : ''} onClick={() => setTab('analytics')}>
           Analytics
         </button>
@@ -143,9 +171,14 @@ export default function Dashboard() {
         <div className="container">
           <Analytics shopId={shopId} />
         </div>
+      ) : tab === 'orders' ? (
+        <div className="container">
+          <Orders shopId={shopId} />
+        </div>
       ) : (
         <div className="dashboard-body dashboard-body-with-nav">
           <nav className="dashboard-nav">
+            <a href="#sec-payments">Payments</a>
             <a href="#sec-address">Site address</a>
             <a href="#sec-brand">Brand & design</a>
             <a href="#sec-hero">Hero</a>
@@ -157,6 +190,33 @@ export default function Dashboard() {
             <a href="#sec-footer">Footer</a>
           </nav>
           <form className="dashboard-form" onSubmit={handleSave}>
+            <section className="dash-section" id="sec-payments">
+              <h2>Payments</h2>
+              {payments.onboarded ? (
+                <p className="payments-status payments-status-ready">✓ Payments are set up — you can sell.</p>
+              ) : payments.accountId ? (
+                <>
+                  <p className="payments-status">Stripe account started, but onboarding isn't finished yet.</p>
+                  <div className="layout-toggle">
+                    <button type="button" className="btn btn-outline" onClick={handleConnectStripe} disabled={payments.busy}>
+                      Finish onboarding
+                    </button>
+                    <button type="button" className="btn btn-outline" onClick={handleCheckStripeStatus} disabled={payments.busy}>
+                      I've finished — check status
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="payments-status">Connect Stripe to start accepting real payments on this shop.</p>
+                  <button type="button" className="btn" onClick={handleConnectStripe} disabled={payments.busy}>
+                    {payments.busy ? 'Redirecting…' : 'Connect Stripe'}
+                  </button>
+                </>
+              )}
+              {payments.error && <p className="auth-error">{payments.error}</p>}
+            </section>
+
             <section className="dash-section" id="sec-address">
               <h2>Site address</h2>
               <label>
@@ -287,9 +347,17 @@ export default function Dashboard() {
                     onChange={(e) => updateArrayItem('products', i, 'name', e.target.value)}
                   />
                   <input
-                    placeholder="Price"
-                    value={p.price}
-                    onChange={(e) => updateArrayItem('products', i, 'price', e.target.value)}
+                    placeholder="Price in USD, e.g. 34.00"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={p.priceCents ? (p.priceCents / 100).toFixed(2) : ''}
+                    onChange={(e) => {
+                      const dollars = parseFloat(e.target.value) || 0
+                      const cents = Math.round(dollars * 100)
+                      updateArrayItem('products', i, 'priceCents', cents)
+                      updateArrayItem('products', i, 'price', `$${dollars.toFixed(2)}`)
+                    }}
                   />
                   <textarea
                     placeholder="Short description (shown in quick-view)"
@@ -309,7 +377,7 @@ export default function Dashboard() {
               <button
                 type="button"
                 className="btn btn-outline"
-                onClick={() => addArrayItem('products', { name: 'New product', price: '$0', tag: null, image: '' })}
+                onClick={() => addArrayItem('products', { name: 'New product', price: '$0', priceCents: 0, tag: null, image: '', description: '' })}
               >
                 Add product
               </button>

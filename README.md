@@ -40,6 +40,66 @@ automatically with placeholder content — the dashboard opens straight
 into editing it. Your public page is at `/site/<slug>`, where `<slug>` is
 shown and editable at the top of the dashboard.
 
+## 4. Set up real payments (Stripe Connect)
+
+This part can't be done from inside this chat — it needs the Supabase CLI
+running on your own computer, since deploying Edge Functions requires an
+interactive login. Here's the full path:
+
+1. **Create a Stripe account** at [stripe.com](https://stripe.com) if you
+   don't have one. Stay in **test mode** while you're setting this up.
+2. **Install the Supabase CLI** and log in:
+   ```bash
+   npm install -g supabase
+   supabase login
+   ```
+3. **Link this project** to your Supabase project (find your project ref
+   in the Supabase dashboard URL, `supabase.com/dashboard/project/<ref>`):
+   ```bash
+   supabase link --project-ref <your-project-ref>
+   ```
+4. **Run the new migration** (`003_stripe_connect.sql`) the same way as
+   the earlier ones — paste it into the SQL Editor and run it.
+5. **Set the secrets your Edge Functions need**. Get your Stripe secret
+   key from the Stripe Dashboard -> Developers -> API keys (use the test
+   key while testing):
+   ```bash
+   supabase secrets set STRIPE_SECRET_KEY=sk_test_...
+   ```
+   The `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` secrets are already
+   available to every Edge Function automatically — you don't set those.
+6. **Deploy the four functions**:
+   ```bash
+   supabase functions deploy create-connect-account
+   supabase functions deploy connect-status
+   supabase functions deploy create-checkout-session
+   supabase functions deploy stripe-webhook --no-verify-jwt
+   ```
+   (`--no-verify-jwt` on the webhook because Stripe calls it directly, not
+   through a logged-in user.)
+7. **Point Stripe's webhook at your function**: in the Stripe Dashboard ->
+   Developers -> Webhooks -> Add endpoint, use the URL Supabase printed
+   after deploying `stripe-webhook` (looks like
+   `https://<project-ref>.supabase.co/functions/v1/stripe-webhook`), and
+   subscribe it to the `checkout.session.completed` event. Stripe will
+   show you a signing secret (`whsec_...`) — set it too:
+   ```bash
+   supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+   ```
+
+Once that's done: in the dashboard's **Payments** section, a shop owner
+clicks **Connect Stripe**, finishes Stripe's short onboarding form, and
+comes back marked as ready to sell. Give each product a price in the
+**Products** section (a plain dollar amount now, not just display text),
+and the storefront will show an **Add to cart** button and a working
+checkout that pays that shop owner directly — Stripe's own fees aside,
+the platform takes nothing unless you add an `application_fee_amount`
+in `create-checkout-session/index.ts` yourself.
+
+**Testing**: use Stripe's test card `4242 4242 4242 4242`, any future
+expiry date, and any CVC. Real charges only happen once you switch your
+Stripe account (and the `STRIPE_SECRET_KEY` secret) out of test mode.
+
 ## How it fits together
 
 - `supabase/schema.sql` — the `shops` table: `owner_id` (not unique — one
@@ -60,6 +120,14 @@ shown and editable at the top of the dashboard.
   renders a 14-day bar chart plus a 30-day total.
 - `src/pages/PublicSite.jsx` — the public route (`/site/:slug`), fetched
   with no login required, and the one place that records a page view.
+  Wraps the page in `CartProvider` and renders `CartDrawer` so visitors
+  can actually buy something.
+- `src/context/CartContext.jsx` — cart state per shop, kept in
+  localStorage in the visitor's own browser (nothing server-side).
+- `supabase/functions/` — four Deno Edge Functions: connecting a shop's
+  Stripe account, checking its onboarding status, creating a Checkout
+  Session that pays that shop directly, and a webhook that records
+  completed orders. See "Set up real payments" above to deploy them.
 - `src/components/StorefrontPage.jsx` — the actual homepage layout
   (header, hero, categories, products, about, testimonial, newsletter,
   footer), shared by both the dashboard preview and the public page.
@@ -88,7 +156,8 @@ shown and editable at the top of the dashboard.
   crawlers that don't run JavaScript (some link-preview bots on WhatsApp,
   Slack, etc.). True social previews need server-side rendering or a
   pre-render step — a bigger change than this client-only app currently has.
-- **Actual selling**: there's still no cart or checkout — the product
-  quick-view is informational only. Adding real commerce would mean an
-  `orders` table, a checkout flow, and a payment processor (Stripe is the
-  usual choice).
+- **Actual selling**: ✅ done — see "Set up real payments" above. Each
+  shop owner connects their own Stripe account and receives payments
+  directly; `orders` records what was paid. Still missing: refunds,
+  shipping/tax calculation, and inventory tracking, all of which Stripe
+  Checkout can partially help with (tax) but aren't wired up here.

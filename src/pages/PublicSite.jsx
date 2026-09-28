@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient.js'
 import StorefrontPage from '../components/StorefrontPage.jsx'
+import CartDrawer from '../components/CartDrawer.jsx'
+import { CartProvider, useCart } from '../context/CartContext.jsx'
 
 function setMeta(property, content, attr = 'property') {
   if (!content) return
@@ -12,6 +14,27 @@ function setMeta(property, content, attr = 'property') {
     document.head.appendChild(tag)
   }
   tag.setAttribute('content', content)
+}
+
+function CheckoutBanner() {
+  const [params, setParams] = useSearchParams()
+  const cart = useCart()
+  const checkout = params.get('checkout')
+
+  useEffect(() => {
+    if (checkout === 'success' && cart) {
+      cart.clear()
+    }
+  }, [checkout, cart])
+
+  if (!checkout) return null
+
+  return (
+    <div className={`checkout-banner ${checkout === 'success' ? 'is-success' : ''}`}>
+      {checkout === 'success' ? 'Thank you — your order went through!' : 'Checkout was cancelled — your cart is still here.'}
+      <button onClick={() => setParams({})}>×</button>
+    </div>
+  )
 }
 
 export default function PublicSite() {
@@ -39,14 +62,12 @@ export default function PublicSite() {
       setShop(data.config)
       setStatus('ready')
 
-      // Update the tab title and social-preview tags for this shop.
       document.title = data.config.brand?.name || 'Shop'
       setMeta('og:title', data.config.brand?.name)
       setMeta('og:description', data.config.hero?.subhead)
       setMeta('og:image', data.config.hero?.image)
       setMeta('theme-color', data.config.theme?.accent, 'name')
 
-      // Fire-and-forget view tracking — never blocks or breaks the page.
       supabase.from('page_views').insert({
         shop_id: data.id,
         path: `/site/${slug}`,
@@ -63,5 +84,11 @@ export default function PublicSite() {
   if (status === 'not-found') return <div className="page-message">No shop found at this address.</div>
   if (status === 'error') return <div className="page-message">Something went wrong loading this shop.</div>
 
-  return <StorefrontPage config={shop} />
+  return (
+    <CartProvider shopKey={slug}>
+      <CheckoutBanner />
+      <StorefrontPage config={shop} />
+      <CartDrawer shopSlug={slug} />
+    </CartProvider>
+  )
 }
